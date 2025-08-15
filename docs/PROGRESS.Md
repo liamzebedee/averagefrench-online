@@ -1,0 +1,6 @@
+- [x] Write the agent
+- [x] Generate tweet dataset
+- [ ] Fine-tune model
+    - Install pytorch
+    - Setup images
+    - Run repo.
