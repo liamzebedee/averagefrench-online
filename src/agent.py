@@ -67,6 +67,7 @@ def setup_db():
     conn.close()
 
 def generate_post(char):
+    char = json.loads(pathlib.Path("data/character.json").read_text(encoding="utf-8"))
     name = char.get("name") or char.get("id") or "agent"
     handle = char.get("twitter", name)
 

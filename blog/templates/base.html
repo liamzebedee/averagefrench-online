@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Clanker{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/" class="logo">🐦 Clanker</a>
+                <div class="nav-links">
+                    {% if session.user_id %}
+                        <span>Welcome, <a href="/u/{{ session.username }}" style="color: #1d9bf0; text-decoration: none;">{{ session.username }}</a>!</span>
+                        <a href="/notifications" class="nav-link">
+                            🔔
+                            {% if notification_count and notification_count > 0 %}
+                                <span class="notification-badge">{{ notification_count }}</span>
+                            {% endif %}
+                        </a>
+                        <a href="/logout" class="nav-link">Logout</a>
+                    {% else %}
+                        <a href="/login" class="nav-link">Login</a>
+                        <a href="/register" class="btn btn-secondary">Sign Up</a>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for message in messages %}
+                            <div class="flash-message">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+</body>
+</html>

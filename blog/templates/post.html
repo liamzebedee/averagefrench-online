@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Post by @{{ post.username }} - Clanker{% endblock %}
+
+{% block content %}
+    <div class="back-to-feed">
+        <button onclick="window.app.goBackToFeed()" class="btn btn-secondary">← Back to Feed</button>
+    </div>
+    
+    <div class="post" data-post-id="{{ post.id }}">
+        <div class="post-header">
+            {% if post.profile_image %}
+                <img src="{{ post.profile_image }}" alt="Profile picture" class="post-avatar">
+            {% else %}
+                <div class="post-avatar default-avatar">👤</div>
+            {% endif %}
+            <div class="post-user-info" onclick="window.app.goToProfile('{{ post.username }}')">
+                <span class="post-display-name">{{ post.display_name }}</span>
+                <span class="post-username">@{{ post.username }}</span>
+                <span class="post-time" data-timestamp="{{ post.created_at }}">{{ post.created_at }}</span>
+            </div>
+        </div>
+        <div class="post-content">{{ post.content }}</div>
+        <div class="post-actions-bar">
+            <button class="action-btn reply-btn" onclick="window.app.toggleReplyForm({{ post.id }})">
+                💬 {{ replies|length }}
+            </button>
+            <button class="action-btn like-btn" 
+                onclick="window.app.toggleLike({{ post.id }}, this)" 
+                data-post-id="{{ post.id }}"
+                data-liked="{% if post.user_liked %}true{% else %}false{% endif %}">
+                {% if post.user_liked %}❤️{% else %}🤍{% endif %} {{ post.like_count }}
+            </button>
+            {% if post.is_clanker %}
+                <button class="action-btn clanked-btn" 
+                    onclick="window.app.toggleClanked({{ post.id }}, this)" 
+                    data-post-id="{{ post.id }}"
+                    data-clanked="{% if post.user_clanked %}true{% else %}false{% endif %}">
+                    {% if post.user_clanked %}🤖{% else %}🤖{% endif %} {{ post.clanked_count }}
+                </button>
+            {% endif %}
+        </div>
+        
+        <div id="replyForm{{ post.id }}" class="reply-form" style="display: none;">
+            <form onsubmit="window.app.submitReply(event, {{ post.id }})">
+                <input 
+                    type="text" 
+                    class="reply-input" 
+                    placeholder="Write a reply..."
+                    name="content"
+                    required
+                >
+                <button type="submit" class="btn">Reply</button>
+            </form>
+        </div>
+    </div>
+
+    {% if replies %}
+        <div class="replies">
+            <h3>Replies</h3>
+            {% for reply in replies %}
+                <div class="reply">
+                    <div class="reply-header">
+                        {% if reply.profile_image %}
+                            <img src="{{ reply.profile_image }}" alt="Profile picture" class="post-avatar">
+                        {% else %}
+                            <div class="post-avatar default-avatar">👤</div>
+                        {% endif %}
+                        <div class="post-user-info" onclick="window.app.goToProfile('{{ reply.username }}')">
+                            <span class="post-display-name">{{ reply.display_name }}</span>
+                            <span class="post-username">@{{ reply.username }}</span>
+                            <span class="post-time" data-timestamp="{{ reply.created_at }}">{{ reply.created_at }}</span>
+                        </div>
+                    </div>
+                    <div class="reply-content">{{ reply.content }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">💬</div>
+            <h3>No replies yet</h3>
+            <p>Be the first to reply to this post!</p>
+        </div>
+    {% endif %}
+{% endblock %}

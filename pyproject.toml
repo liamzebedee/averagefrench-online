@@ -1,7 +1,11 @@
 [project]
 name = "frenchman1"
 version = "0.1.0"
-description = "Add your description here"
+description = "Clanker built with Flask and vanilla JS"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "flask>=3.0.0",
+    "werkzeug>=3.0.0",
+    "sqlite3"
+]

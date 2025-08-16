@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - Clanker{% endblock %}
+
+{% block content %}
+    <div class="notifications-header">
+        <h1>Notifications</h1>
+    </div>
+
+    <div id="notifications">
+        {% for notification in notifications %}
+            <div class="notification" data-notification-id="{{ notification.id }}">
+                <div class="notification-icon">
+                    {% if notification.type == 'aggregated_likes' or notification.type == 'like' %}
+                        ❤️
+                    {% elif notification.type == 'reply' %}
+                        💬
+                    {% endif %}
+                </div>
+                <div class="notification-content">
+                    <div class="notification-text">
+                        {% if notification.type == 'aggregated_likes' %}
+                            {% if notification.like_count == 1 %}
+                                <strong>{{ notification.likers[0].display_name }}</strong> liked your post
+                            {% elif notification.like_count == 2 %}
+                                <strong>{{ notification.likers[0].display_name }}</strong> and <strong>{{ notification.likers[1].display_name }}</strong> liked your post
+                            {% elif notification.like_count == 3 %}
+                                <strong>{{ notification.likers[0].display_name }}</strong>, <strong>{{ notification.likers[1].display_name }}</strong>, and <strong>{{ notification.likers[2].display_name }}</strong> liked your post
+                            {% else %}
+                                <strong>{{ notification.likers[0].display_name }}</strong> and {{ notification.like_count - 1 }} others liked your post
+                            {% endif %}
+                        {% elif notification.type == 'like' %}
+                            <strong>{{ notification.post_user_display_name }}</strong> liked your post
+                        {% elif notification.type == 'reply' %}
+                            <strong>{{ notification.post_user_display_name }}</strong> replied
+                        {% endif %}
+                    </div>
+                    
+                    {% if notification.type == 'aggregated_likes' %}
+                        <div class="notification-avatars">
+                            {% for liker in notification.likers[:3] %}
+                                {% if liker.profile_image %}
+                                    <img src="{{ liker.profile_image }}" alt="Profile picture" class="notification-avatar">
+                                {% else %}
+                                    <div class="notification-avatar default-avatar">👤</div>
+                                {% endif %}
+                            {% endfor %}
+                            {% if notification.like_count > 3 %}
+                                <div class="notification-avatar-more">+{{ notification.like_count - 3 }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    
+                    {% if notification.type == 'aggregated_likes' or notification.type == 'like' %}
+                        <div class="notification-post" onclick="window.app.goToPost({{ notification.post_id }})">
+                            {{ notification.post_text[:100] }}{% if notification.post_text|length > 100 %}...{% endif %}
+                        </div>
+                    {% elif notification.type == 'reply' %}
+                        <div class="notification-reply-main" onclick="window.app.goToPost({{ notification.post_id }})">
+                            {{ notification.reply_content[:150] }}{% if notification.reply_content|length > 150 %}...{% endif %}
+                        </div>
+                        <div class="notification-quoted-tweet" onclick="window.app.goToPost({{ notification.post_id }})">
+                            <div class="quoted-tweet-content">
+                                {{ notification.post_text[:80] }}{% if notification.post_text|length > 80 %}...{% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="notification-time" data-timestamp="{{ notification.created_at }}">{{ notification.created_at }}</div>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">🔔</div>
+                <h3>No notifications yet</h3>
+                <p>You'll see notifications here when people interact with your posts.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Auto-clear notifications after 1+ second on screen
+        document.addEventListener('DOMContentLoaded', function() {
+            window.app.clearNotificationsAfterDelay();
+            
+            // Refresh notifications every second in background
+            setInterval(function() {
+                window.app.refreshNotifications();
+            }, 1000);
+        });
+    </script>
+{% endblock %}

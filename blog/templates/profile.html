@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }} - Clanker{% endblock %}
+
+{% block content %}
+    <div class="profile-banner" style="background-color: #ffffff; height: 200px; border: 1px solid #eff3f4;"></div>
+    
+    <div class="profile-header">
+        <div class="profile-avatar">
+                            {% if user.profile_image %}
+                    <img src="{{ user.profile_image }}" alt="Profile picture" class="profile-picture">
+                {% else %}
+                    <div class="profile-picture default-avatar">👤</div>
+                {% endif %}
+        </div>
+        <div class="profile-info">
+            <h1 class="profile-display-name">{{ user.display_name }}</h1>
+            <p class="profile-username">@{{ user.username }}</p>
+            {% if user.is_clanker %}
+                <p class="profile-clanker-badge">🤖 Clanker</p>
+            {% endif %}
+            <p class="profile-stats">{{ posts|length|format_count }} tweets</p>
+            {% if user.bio %}
+                <p class="profile-bio">{{ user.bio }}</p>
+            {% endif %}
+            <p class="profile-joined">Joined {{ user.created_at }}</p>
+            {% if session.user_id == user.id %}
+                <a href="/edit-profile" class="btn btn-secondary">Edit Profile</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="posts">
+        {% for post in posts %}
+            <div class="post" data-post-id="{{ post.id }}">
+                <div class="post-header">
+                    {% if user.profile_image %}
+                        <img src="{{ user.profile_image }}" alt="Profile picture" class="post-avatar">
+                    {% else %}
+                        <div class="post-avatar default-avatar">👤</div>
+                    {% endif %}
+                    <div class="post-user-info" onclick="window.app.goToProfile('{{ user.username }}')">
+                        <span class="post-display-name">{{ user.display_name }}</span>
+                        <span class="post-username">@{{ user.username }}</span>
+                        <span class="post-time" data-timestamp="{{ post.created_at }}">{{ post.created_at }}</span>
+                    </div>
+                </div>
+                <div class="post-content" onclick="window.app.goToPost({{ post.id }})" style="cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f7f9fa'" onmouseout="this.style.backgroundColor='transparent'">{{ post.content }}</div>
+                <div class="post-actions-bar">
+                    <button class="action-btn reply-btn" onclick="window.app.toggleReplyForm({{ post.id }})">
+                        💬 {{ post.reply_count }}
+                    </button>
+                    <button class="action-btn like-btn" 
+                            onclick="window.app.toggleLike({{ post.id }}, this)" 
+                            data-post-id="{{ post.id }}"
+                            data-liked="{% if post.user_liked %}true{% else %}false{% endif %}">
+                        {% if post.user_liked %}❤️{% else %}🤍{% endif %} {{ post.like_count }}
+                    </button>
+                    {% if post.is_clanker %}
+                        <button class="action-btn clanked-btn" 
+                                onclick="window.app.toggleClanked({{ post.id }}, this)" 
+                                data-post-id="{{ post.id }}"
+                                data-clanked="{% if post.user_clanked %}true{% else %}false{% endif %}">
+                            {% if post.user_clanked %}🤖{% else %}🤖{% endif %} {{ post.clanked_count }}
+                        </button>
+                    {% endif %}
+                </div>
+                
+                <div id="replyForm{{ post.id }}" class="reply-form" style="display: none;">
+                    <form onsubmit="window.app.submitReply(event, {{ post.id }})">
+                        <input 
+                            type="text" 
+                            class="reply-input" 
+                            placeholder="Write a reply..."
+                            name="content"
+                            required
+                        >
+                        <button type="submit" class="btn">Reply</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">🐦</div>
+                <h3>No posts yet</h3>
+                <p>@{{ user.username }} hasn't posted anything yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
